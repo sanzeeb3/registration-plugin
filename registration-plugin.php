@@ -4,8 +4,8 @@
  * Plugin Name: Basic Registration Plugin
  * Description: Drag and Drop user registration.
  * Version: 1.0.4
- * Author: Me
- * Author URI: https://
+ * Author: Sanjeev
+ * Author URI: http://www.sanjeebaryal.com.np
  */
 
 
@@ -131,8 +131,9 @@ function shortcode_function()
 {
     ob_start();
  	insert_data();
+    $getData = new GetData();
+    $getData->getdata(); 
 
-    $getData->getdata();
     return ob_get_clean();
 }
 ?>

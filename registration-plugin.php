@@ -13,6 +13,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+
+require_once plugin_dir_path( __FILE__ ) . '/class-MySettingsPage.php';
+require_once plugin_dir_path( __FILE__ ) . '/class-GetData.php';
+
 function my_init_method()
 {	
  	wp_register_style ( 'mysample', plugins_url ( 'assets/css/custom.css', __FILE__ ) );
@@ -20,25 +24,62 @@ function my_init_method()
  	// wp_register_style('prefix_bootstrap', 'maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css');
 }
 	
- add_action('init', 'my_init_method');
+ add_action('wp_enqueue_scripts', 'my_init_method');
 
 function registration_form_view()
 {
-  	
+      
   	echo 
   	  		'	<fieldset>
   	  			<legend>Form</legend>
   	  			<form id="register-form" action="' . $_SERVER['REQUEST_URI'] . '" method="POST">
-  					<label>Username:<span style="color:red">*</span></label>
-  					<input name="username" type="text" value="" required>
-  					<label>Email:<span style="color:red">*</span></label>
-  					<input name="email" type="email" value="" required>
-  					<label>Password:</label>
-  					<input name="password" type="password" value="">
-  					<input class="btn btn-default" name="submit" type="submit" value="submit">
-  				</form>
-  				</fieldset>
-  			';
+            ';
+
+            if(get_option('bp-username-field')=="checked")
+            {
+    	        echo    
+                    '<label>Username:<span style="color:red">*</span></label>
+  					 <input name="username" type="text" value="' . ( isset( $_POST['username']) ? $_POST['username'] : null ) . '" required>
+                    ';
+            }
+
+            if(get_option('bp-email-field')=="checked")
+            { 
+    			echo	
+                    '<label>Email:<span style="color:red">*</span></label>
+  					 <input name="email" type="email" value="' . ( isset( $_POST['email']) ? $_POST['email'] : null ) . '" required>
+                    ';
+            }
+
+            if(get_option('bp-password-field')=="checked")
+            {
+  	            echo
+    				'<label>Password:</label>
+  					 <input name="password" type="password" value="' . ( isset( $_POST['password']) ? $_POST['password'] : null ) . '"">
+                    ';
+            }
+
+            if(get_option('bp-website-field')=="checked")
+            {
+                echo 
+                    '<label>Website:</label>
+                     <input name="website" type="text" value="' . ( isset( $_POST['website']) ? $_POST['website'] : null ) . '"">
+                    ';
+            }
+
+            if(get_option('bp-bio-field')=="checked")
+            {
+                echo 
+                    '<label>Bio:</label>
+                     <input name="bio" type="text" value="' . ( isset( $_POST['bio']) ? $_POST['bio'] : null ) . '"">
+                    ';
+            }
+            
+  				
+                echo '<input class="btn btn-default" name="submit" type="submit" value="submit">
+  				      </form>
+  				      </fieldset>
+  			           ';
 
   }
 
@@ -64,7 +105,7 @@ function registration_validation($username,$email,$password)
         $reg_errors->add( 'username_invalid', 'Sorry, the username you entered is not valid' );
     }
 
-    if ( 5 > strlen( $password ) ) {
+    if ( 5 >= strlen( $password ) ) {
         $reg_errors->add( 'password', 'Password length must be greater than 5' );
     }
     
@@ -94,11 +135,17 @@ function insert_data()
 	if(isset($_POST['submit']))
 	{
 
-		$username=isset($_POST['username'])?$_POST['username']:null;
-		$email=isset($_POST['email'])?$_POST['email']:null;
-		$password=isset($_POST['password'])?$_POST['password']:null;
+		$username=sanitize_user(isset($_POST['username'])?$_POST['username']:null);
+		
+        $email=sanitize_email(isset($_POST['email'])?$_POST['email']:null);
 
-		registration_validation($username,$email,$password);
+		$password= esc_attr(isset($_POST['password'])?$_POST['password']:null);
+        
+        $website=sanitize_text_field(isset($_POST['website'])?$_POST['website']:null);
+
+        $bio=sanitize_text_field(isset($_POST['bio'])?$_POST['bio']:null);
+		
+        registration_validation($username,$email,$password);
 	
 		$userdata = array(
         	'user_login'    =>   $username,
@@ -120,17 +167,13 @@ function insert_data()
     
 }
 
-
-require_once plugin_dir_path( __FILE__ ) . '/class-MySettingsPage.php';
-require_once plugin_dir_path( __FILE__ ) . '/class-GetData.php';
-
  
 add_shortcode('registration-plugin','shortcode_function');
 
 function shortcode_function()
 {
     ob_start();
- 	insert_data();
+  	insert_data();
     $getData = new GetData();
     $getData->getdata(); 
 

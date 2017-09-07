@@ -20,7 +20,7 @@ class GetData
 	        $editUrl = admin_url('admin-ajax.php').'?action=myprefix_edit_user&user_id='.$user->ID;	
 
     	    echo  "<a href='".$deleteUrl. "'>Delete User</a>"; 
-        	echo  "<a href='".$editUrl. "'>Edit User</a>"; 
+        	echo  "<a href='".$editUrl. "&edit=1'>Edit User</a>"; 
 
         	echo '<br>';
     	}     	
@@ -28,7 +28,6 @@ class GetData
 
  	public function myprefix_delete_user_cb()
  	{
-
     	wp_enqueue_style('mysample'); 
 
         	$user_id = intval($_REQUEST['user_id']);

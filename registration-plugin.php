@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once plugin_dir_path( __FILE__ ) . '/class-MySettingsPage.php';
 require_once plugin_dir_path( __FILE__ ) . '/class-GetData.php';
+require_once plugin_dir_path( __FILE__ ) . '/class-Bp_getcountry.php';
 
 function my_init_method()
 {	
@@ -28,6 +29,8 @@ function my_init_method()
 
 function registration_form_view()
 {
+    $country=new Bp_getcountry();
+    $country=$country->get_country();
       
   	echo 
   	  		'	<fieldset>
@@ -74,9 +77,23 @@ function registration_form_view()
                      <input name="bio" type="text" value="' . ( isset( $_POST['bio']) ? $_POST['bio'] : null ) . '"">
                     ';
             }
+
+            if(get_option('bp-country-field')=="checked")
+            {
+                echo 
+                    '<label>Country:</label>
+                        <select name="country">
+                        <option value="">--Select a country--</option>
+                    ';
+                        
+                        
+                    foreach($country as $key => $value):
+                        echo '<option value="'.$key.'">'.$value.'</option>'; 
+                    endforeach;
+            }
             
   				
-                echo '<input class="btn btn-default" name="submit" type="submit" value="submit">
+                echo '<br><br><input class="btn btn-default" name="submit" type="submit" value="submit">
   				      </form>
   				      </fieldset>
   			           ';
@@ -174,8 +191,7 @@ function shortcode_function()
 {
     ob_start();
   	insert_data();
-    $getData = new GetData();
-    $getData->getdata(); 
+
 
     return ob_get_clean();
 }
